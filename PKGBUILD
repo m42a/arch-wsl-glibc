@@ -7,7 +7,7 @@
 # NOTE: valgrind requires rebuilt with each major glibc version
 
 pkgbase=glibc
-pkgname=(glibc lib32-glibc)
+pkgname=(glibc lib32-glibc glibc-locales)
 pkgver=2.38
 _commit=f6445dc94da185b3d1ee283f0ca0a34c4e1986cc
 pkgrel=5
@@ -105,14 +105,10 @@ build() {
     make -O
   )
 
-  # pregenerate C.UTF-8 locale until it is built into glibc
-  # https://sourceware.org/glibc/wiki/Proposals/C.UTF-8
-  # https://bugs.archlinux.org/task/74864
-  #
-  # do this here instead of in package_glibc()
-  # because localedef does not like fakeroot
+  # pregenerate locales here instead of in package
+  # functions because localedef does not like fakeroot
   make -C "${srcdir}"/glibc/localedata objdir="${srcdir}"/glibc-build \
-    DESTDIR="${srcdir}"/locales install-files-C.UTF-8/UTF-8
+    DESTDIR="${srcdir}"/locales install-locale-files
 }
 
 # Credits for _skip_test() and check() @allanmcrae
@@ -180,6 +176,9 @@ package_glibc() {
     localedata/SUPPORTED > "${pkgdir}"/usr/share/i18n/SUPPORTED
 
   # install C.UTF-8 so that it is always available
+  # should be built into glibc eventually
+  # https://sourceware.org/glibc/wiki/Proposals/C.UTF-8
+  # https://bugs.archlinux.org/task/74864
   install -dm755 "${pkgdir}"/usr/lib/locale
   cp -r "${srcdir}"/locales/usr/lib/locale/C.utf8 -t "${pkgdir}"/usr/lib/locale
   sed -i '/#C\.UTF-8 /d' "${pkgdir}"/etc/locale.gen
@@ -212,4 +211,15 @@ package_lib32-glibc() {
 
   # Symlink /usr/lib32/locale to /usr/lib/locale
   ln -s ../lib/locale "${pkgdir}"/usr/lib32/locale
+}
+
+package_glibc-locales() {
+  pkgdesc='Pregenerated locales for GNU C Library'
+  depends=("glibc=$pkgver")
+
+  cp -r locales/* -t "${pkgdir}"
+  rm -r "${pkgdir}"/usr/lib/locale/C.utf8
+
+  # deduplicate locale data
+  hardlink -c "${pkgdir}"/usr/lib/locale
 }
