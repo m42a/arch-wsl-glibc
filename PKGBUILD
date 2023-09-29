@@ -152,7 +152,7 @@ package_glibc() {
   backup=(etc/gai.conf
           etc/locale.gen)
 
-  make -C glibc-build install_root="${pkgdir}" install
+  make -C glibc-build DESTDIR="${pkgdir}" install
   rm -f "${pkgdir}"/etc/ld.so.cache
 
   # Shipped in tzdata
@@ -193,7 +193,7 @@ package_lib32-glibc() {
 
   cd lib32-glibc-build
 
-  make install_root="${pkgdir}" install
+  make DESTDIR="${pkgdir}" install
   rm -rf "${pkgdir}"/{etc,sbin,usr/{bin,sbin,share},var}
 
   # We need to keep 32 bit specific header files
