@@ -62,44 +62,48 @@ build() {
       --disable-werror
   )
 
-  cd "${srcdir}"/glibc-build
+  (
+    cd glibc-build
 
-  echo "slibdir=/usr/lib" >> configparms
-  echo "rtlddir=/usr/lib" >> configparms
-  echo "sbindir=/usr/bin" >> configparms
-  echo "rootsbindir=/usr/bin" >> configparms
+    echo "slibdir=/usr/lib" >> configparms
+    echo "rtlddir=/usr/lib" >> configparms
+    echo "sbindir=/usr/bin" >> configparms
+    echo "rootsbindir=/usr/bin" >> configparms
 
-  # Credits @allanmcrae
-  # https://github.com/allanmcrae/toolchain/blob/f18604d70c5933c31b51a320978711e4e6791cf1/glibc/PKGBUILD
-  # remove fortify for building libraries
-  # CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=2/}
+    # Credits @allanmcrae
+    # https://github.com/allanmcrae/toolchain/blob/f18604d70c5933c31b51a320978711e4e6791cf1/glibc/PKGBUILD
+    # remove fortify for building libraries
+    # CFLAGS=${CFLAGS/-Wp,-D_FORTIFY_SOURCE=2/}
 
-  "${srcdir}"/glibc/configure \
-      --libdir=/usr/lib \
-      --libexecdir=/usr/lib \
-      "${_configure_flags[@]}"
+    "${srcdir}"/glibc/configure \
+        --libdir=/usr/lib \
+        --libexecdir=/usr/lib \
+        "${_configure_flags[@]}"
 
-  make -O
+    make -O
 
-  # build info pages manually for reproducibility
-  make info
+    # build info pages manually for reproducibility
+    make info
+  )
 
-  cd "${srcdir}"/lib32-glibc-build
-  export CC="gcc -m32 -mstackrealign"
-  export CXX="g++ -m32 -mstackrealign"
+  (
+    cd lib32-glibc-build
+    export CC="gcc -m32 -mstackrealign"
+    export CXX="g++ -m32 -mstackrealign"
 
-  echo "slibdir=/usr/lib32" >> configparms
-  echo "rtlddir=/usr/lib32" >> configparms
-  echo "sbindir=/usr/bin" >> configparms
-  echo "rootsbindir=/usr/bin" >> configparms
+    echo "slibdir=/usr/lib32" >> configparms
+    echo "rtlddir=/usr/lib32" >> configparms
+    echo "sbindir=/usr/bin" >> configparms
+    echo "rootsbindir=/usr/bin" >> configparms
 
-  "${srcdir}"/glibc/configure \
-      --host=i686-pc-linux-gnu \
-      --libdir=/usr/lib32 \
-      --libexecdir=/usr/lib32 \
-      "${_configure_flags[@]}"
+    "${srcdir}"/glibc/configure \
+        --host=i686-pc-linux-gnu \
+        --libdir=/usr/lib32 \
+        --libexecdir=/usr/lib32 \
+        "${_configure_flags[@]}"
 
-  make -O
+    make -O
+  )
 
   # pregenerate C.UTF-8 locale until it is built into glibc
   # https://sourceware.org/glibc/wiki/Proposals/C.UTF-8
@@ -111,15 +115,15 @@ build() {
     DESTDIR="${srcdir}"/locales install-files-C.UTF-8/UTF-8
 }
 
-# Credits for skip_test() and check() @allanmcrae
+# Credits for _skip_test() and check() @allanmcrae
 # https://github.com/allanmcrae/toolchain/blob/f18604d70c5933c31b51a320978711e4e6791cf1/glibc/PKGBUILD
-skip_test() {
+_skip_test() {
   test=${1}
   file=${2}
   sed -i "/\b${test} /d" "${srcdir}"/glibc/${file}
 }
 
-check() {
+check() (
   cd glibc-build
 
   # adjust/remove buildflags that cause false-positive testsuite failures
@@ -132,16 +136,16 @@ check() {
   # The following tests fail due to restrictions in the Arch build system
   # The correct fix is to add the following to the systemd-nspawn call:
   # --system-call-filter="@clock @memlock @pkey"
-  skip_test test-errno-linux        sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-mlock2              sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-ntp_gettime         sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-ntp_gettimex        sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-pkey                sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-process_mrelease    sysdeps/unix/sysv/linux/Makefile
-  skip_test tst-adjtime             time/Makefile
+  _skip_test test-errno-linux        sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-mlock2              sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-ntp_gettime         sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-ntp_gettimex        sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-pkey                sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-process_mrelease    sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-adjtime             time/Makefile
 
   make -O check
-}
+)
 
 package_glibc() {
   pkgdesc='GNU C Library'
