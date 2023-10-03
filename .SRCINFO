@@ -11,7 +11,7 @@ pkgbase = glibc
 	makedepends = python
 	options = staticlibs
 	options = !lto
-	source = git+https://sourceware.org/git/glibc.git#commit=f6445dc94da185b3d1ee283f0ca0a34c4e1986cc
+	source = git+https://sourceware.org/git/glibc.git#commit=750a45a783906a19591fb8ff6b7841470f1f5701
 	source = locale.gen.txt
 	source = locale-gen
 	source = lib32-glibc.conf

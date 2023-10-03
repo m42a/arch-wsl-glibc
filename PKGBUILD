@@ -9,7 +9,7 @@
 pkgbase=glibc
 pkgname=(glibc lib32-glibc glibc-locales)
 pkgver=2.38
-_commit=f6445dc94da185b3d1ee283f0ca0a34c4e1986cc
+_commit=750a45a783906a19591fb8ff6b7841470f1f5701
 pkgrel=6
 arch=(x86_64)
 url='https://www.gnu.org/software/libc'
