@@ -21,7 +21,6 @@ source=(git+https://sourceware.org/git/glibc.git#commit=${_commit}
         locale-gen
         lib32-glibc.conf
         sdt.h sdt-config.h
-        reenable_DT_HASH.patch
 )
 validpgpkeys=(7273542B39962DF7B299931416792B4EA25340F8 # Carlos O'Donell
               BC7C7372637EC10C57D7AA6579C43DFBF1CF2187) # Siddhesh Poyarekar
@@ -39,10 +38,6 @@ prepare() {
   [[ -d glibc-$pkgver ]] && ln -s glibc-$pkgver glibc
   cd glibc
 
-  # Re-enable `--hash-style=both` for building shared objects due to issues with EPIC's EAC
-  # which relies on DT_HASH to be present in these libs.
-  # reconsider 2023-01
-  patch -Np1 -i "${srcdir}"/reenable_DT_HASH.patch
 }
 
 build() {
