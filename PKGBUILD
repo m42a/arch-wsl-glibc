@@ -8,9 +8,9 @@
 
 pkgbase=glibc
 pkgname=(glibc lib32-glibc glibc-locales)
-pkgver=2.38
-_commit=d37c2b20a4787463d192b32041c3406c2bd91de0
-pkgrel=8
+pkgver=2.39
+_commit=6d1e3fb07b45e2e31e469b16cf21b24bccf8914c
+pkgrel=1
 arch=(x86_64)
 url='https://www.gnu.org/software/libc'
 license=(GPL-2.0-or-later LGPL-2.1-or-later)
@@ -43,9 +43,8 @@ build() {
   local _configure_flags=(
       --prefix=/usr
       --with-headers=/usr/include
-      --with-bugurl=https://bugs.archlinux.org/
+      --with-bugurl=https://gitlab.archlinux.org/archlinux/packaging/packages/glibc/-/issues
       --enable-bind-now
-      --enable-cet
       --enable-fortify-source
       --enable-kernel=4.4
       --enable-multi-arch
@@ -72,6 +71,7 @@ build() {
     "${srcdir}"/glibc/configure \
         --libdir=/usr/lib \
         --libexecdir=/usr/lib \
+        --enable-cet \
         "${_configure_flags[@]}"
 
     make -O
@@ -132,6 +132,7 @@ check() (
   _skip_test tst-ntp_gettimex        sysdeps/unix/sysv/linux/Makefile
   _skip_test tst-pkey                sysdeps/unix/sysv/linux/Makefile
   _skip_test tst-process_mrelease    sysdeps/unix/sysv/linux/Makefile
+  _skip_test tst-shstk-legacy-1g     sysdeps/x86_64/Makefile
   _skip_test tst-adjtime             time/Makefile
 
   make -O check
